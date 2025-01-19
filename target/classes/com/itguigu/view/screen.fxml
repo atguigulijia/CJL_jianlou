@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="rootPane" prefHeight="500.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.itguigu.controller.Controller">
+    <children>
+        <!-- 主布局 -->
+        <SplitPane dividerPositions="0.7" layoutY="0.0" prefHeight="500.0" prefWidth="850.0">
+            <items>
+                <!-- 左侧布局 -->
+                <AnchorPane>
+                    <children>
+                        <SplitPane orientation="VERTICAL" dividerPositions="0.4" prefHeight="500.0" prefWidth="600.0">
+                            <items>
+                                <!-- 用户表 -->
+                                <AnchorPane>
+                                    <children>
+                                        <TableView fx:id="userTableView" prefHeight="200.0" prefWidth="600.0" />
+                                    </children>
+                                </AnchorPane>
+                                <!-- 日志输出区域 -->
+                                <AnchorPane>
+                                    <children>
+                                        <BorderPane prefHeight="300.0" prefWidth="600.0">
+                                            <center>
+                                                <TextArea fx:id="logTextArea" editable="false" wrapText="true" promptText="日志输出:" prefHeight="300.0" prefWidth="600.0" style="-fx-control-inner-background: white; -fx-text-fill: black; -fx-font-size: 14px;" />
+                                            </center>
+                                        </BorderPane>
+                                    </children>
+                                </AnchorPane>
+                            </items>
+                        </SplitPane>
+                    </children>
+                </AnchorPane>
+
+                <!-- 右侧布局 -->
+                <AnchorPane>
+                    <children>
+                        <VBox spacing="8.0" prefHeight="500.0" prefWidth="250.0" alignment="TOP_CENTER">
+
+                            <!-- 用户信息配置 -->
+                            <VBox spacing="8.0" style="-fx-border-color: lightgray; -fx-border-width: 1; -fx-background-color: #f9f9f9; -fx-padding: 10;">
+                                <Label text="用户信息配置" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" />
+                                <VBox spacing="5.0" style="-fx-padding: 5;">
+                                    <HBox spacing="5.0" alignment="CENTER_LEFT">
+                                        <Label text="账号：" />
+                                        <TextField fx:id="accTextField" text="13397497249" prefWidth="140.0" />
+                                    </HBox>
+                                    <HBox spacing="5.0" alignment="CENTER_LEFT">
+                                        <Label text="密码：" />
+                                        <TextField fx:id="pwdTextField" text="L123456789" prefWidth="140.0" />
+                                    </HBox>
+                                    <HBox spacing="5.0" alignment="CENTER_LEFT">
+                                        <Label text="邮箱：" />
+                                        <TextField fx:id="emailTextField" text="1295905922@qq.com" prefWidth="100.0" />
+                                        <CheckBox fx:id="emailPushCheckBox" text="开启推送" onAction="#changeEmailPushStatus" textFill="#13dd3c" />
+                                    </HBox>
+                                    <HBox spacing="5.0" alignment="CENTER_LEFT">
+                                        <Label text="捡漏次数：" />
+                                        <TextField fx:id="inputCountTextField" text="1" prefWidth="140.0" />
+                                    </HBox>
+                                    <Button fx:id="userLoginButton" text="登录" onAction="#userLogin" prefWidth="80.0" alignment="CENTER" />
+                                </VBox>
+                            </VBox>
+
+                            <!-- 操作设置 -->
+                            <VBox spacing="8.0" style="-fx-border-color: lightgray; -fx-border-width: 1; -fx-background-color: #f9f9f9; -fx-padding: 10;">
+                                <Label text="操作设置" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" />
+                                <VBox spacing="8.0" style="-fx-padding: 5;">
+                                    <HBox spacing="5.0">
+                                        <Label text="藏品id:" />
+                                        <ComboBox fx:id="goodsListCombox" prefWidth="120.0" />
+                                        <Button fx:id="catchGoodsListButton" text="抓取" onAction="#catchGoodsList" />
+                                    </HBox>
+                                    <HBox spacing="5.0">
+                                        <Label text="代理:" />
+                                        <TextField fx:id="proxyTextField" promptText="请输入代理链接(txt格式)" prefWidth="135.0" />
+                                        <CheckBox fx:id="proxyCheckBox" text="启用" onAction="#changeProxyStatus" textFill="#13dd3c" />
+                                    </HBox>
+                                    <HBox spacing="5.0">
+                                        <Label text="请求间隔:" />
+                                        <TextField fx:id="requestDelayTimeTextField" promptText="默认300毫秒" prefWidth="120.0" onAction="#changeRequestDelayTime" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+
+                            <!-- 操作按钮 -->
+                            <FlowPane hgap="10" vgap="10" alignment="CENTER">
+                                <Button fx:id="outputUserDataButton" text="导出用户" onAction="#outputUserData" />
+                                <Button fx:id="outputSuccessDataButton" text="导出成功数据" onAction="#outputSuccessData" />
+                                <Button fx:id="inputUserDataButton" text="导入用户" onAction="#inputUserData" />
+                                <Button fx:id="clearLogButton" text="清空日志" onAction="#clearLog" />
+                                <Button fx:id="runButton" text="运行" onAction="#startRun" />
+                                <Button fx:id="stopButton" text="终止" onAction="#stopRun" />
+                            </FlowPane>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+
+        <!-- 底部标签 -->
+        <Label text="物是人非事事休" layoutX="10.0" layoutY="480.0" style="-fx-font-size: 14;" textFill="#2e55e5" />
+    </children>
+</AnchorPane>
