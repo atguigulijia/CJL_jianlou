@@ -38,7 +38,7 @@ public class GlobalProxyThread extends Thread {
 
     @Override
     public void run() {
-        while (GlobalProperties.isRun) {
+        while (true) {
             synchronized (lock) {
                 try {
                     // 等待条件满足

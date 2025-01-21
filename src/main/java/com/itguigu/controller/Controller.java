@@ -2,6 +2,8 @@ package com.itguigu.controller;
 
 import com.itguigu.model.*;
 import com.itguigu.service.PurchaseService;
+import com.itguigu.service.UserService;
+import com.itguigu.task.TaskManager;
 import com.itguigu.util.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,6 +33,11 @@ public class Controller implements Initializable {
 
     //保证唯一对象
     private final PurchaseService purchaseService = PurchaseService.getInstance();
+    //保证唯一对象
+    private final UserService userService = UserService.getInstance();
+    //保证唯一对象
+    private final TaskManager taskManager = TaskManager.getInstance();
+
 
     @FXML
     private TextArea logTextArea;
@@ -104,7 +111,7 @@ public class Controller implements Initializable {
             return;
         }
 
-        User user = purchaseService.handlerLogin(acc, pwd, GlobalProperties.globalProxy);
+        User user = userService.handlerLogin(acc, pwd, GlobalProperties.globalProxy);
 
         if (user != null) {
             user.setGoodsCategoryInfo(goodsCategoryInfo);
@@ -136,6 +143,7 @@ public class Controller implements Initializable {
             }
             return;
         }
+        //成功
         //写入数据保存到本地
         try {
             CSVUtils.writeToCSV(GoodsCategoryInfo.class, goodsList, GlobalProperties.filePath + "goodsCategoryInfo.csv", "\t");
@@ -251,15 +259,18 @@ public class Controller implements Initializable {
     //终止运行
     public void stopRun(ActionEvent actionEvent) {
         if (GlobalProperties.isRun) {
+            //关闭捡漏任务和全局代理任务
             LogUtil.println("程序终止");
             GlobalProperties.isRun = false;
+            //这里直接清空了taskmanager中的所有任务
             purchaseService.stop();
         }
 
     }
 
-    //启动程序
+    //启动
     public void startRun(ActionEvent actionEvent) {
+        //登录校验
         if (userList == null || userList.size() == 0) {
             LogUtil.println("请先完成用户登录");
             return;
@@ -268,11 +279,20 @@ public class Controller implements Initializable {
 
         //未启动
         if (!GlobalProperties.isRun) {
+            LogUtil.println("程序启动");
             GlobalProperties.isRun = true;//已经启动
             //启动定时器
             TableViewRefresher.startRefreshTimer(userTableView);
-            LogUtil.println("程序启动");
-            purchaseService.run(userList);
+            //启动全局代理线程->添加代理任务到任务管理器
+//            taskManager.addTask("globalProxyTask",GlobalProxyThread.getInstance());
+            taskManager.addTaskWithTiming("globalProxyTask",()->{
+                //满足条件
+                if (GlobalProperties.isRun && GlobalProperties.useProxy){
+                    GlobalProperties.globalProxy = ProxyUtils.getProxy(GlobalProperties.globalProxyUrl);
+                }
+            },1,GlobalProperties.requestDelayTime-10);
+            //开启捡漏任务
+            purchaseService.start(userList);
         } else {
             LogUtil.println("请不要重复启动，会导致线程池异常");
         }

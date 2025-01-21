@@ -1,11 +1,15 @@
 package com.itguigu.task;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class TaskManager {
-    //taskName 格式 = "13397497249_buyTask"
+    private static final Logger logger = LoggerFactory.getLogger(TaskManager.class);
+
     private final ScheduledExecutorService schedulerService;
     private final ConcurrentHashMap<String, ScheduledFuture<?>> userTasks;
 
@@ -17,7 +21,6 @@ public class TaskManager {
 
     // 私有构造函数，外部无法直接实例化
     private TaskManager() {
-        // 使用固定大小的线程池来调度任务
         this.schedulerService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
         this.userTasks = new ConcurrentHashMap<>();
     }
@@ -34,16 +37,15 @@ public class TaskManager {
         return instance;
     }
 
-    // 周期性任务调度，重复提交时会取消已有的任务并重新创建任务
+    // 周期性任务调度
     public void addTaskWithTiming(String taskName, Runnable runTask, long initialDelay, long period) {
-        stopTasksByIdPrefix(taskName);
+        // 确保任务唯一性
         ScheduledFuture<?> future = schedulerService.scheduleAtFixedRate(runTask, initialDelay, period, TimeUnit.MILLISECONDS);
-        userTasks.put(taskName, future);
+        userTasks.putIfAbsent(taskName, future);
     }
 
-    // 立即执行的单次任务，重复提交时会取消已有的任务并重新创建任务
+    // 立即执行的单次任务
     public void addTask(String taskName, Runnable runTask) {
-//        cancelExistingTask(taskName);
         ScheduledFuture<?> future = schedulerService.schedule(runTask, 0, TimeUnit.MILLISECONDS);
         userTasks.put(taskName, future);
     }
@@ -51,8 +53,15 @@ public class TaskManager {
     // 停止特定任务
     public void stopTask(String taskName) {
         ScheduledFuture<?> future = userTasks.remove(taskName);
-        if (future != null) {
-            future.cancel(true);
+        if (future != null && !future.isCancelled()) {
+            boolean wasCancelled = future.cancel(true);
+            if (wasCancelled) {
+                logger.info("Task " + taskName + " was successfully cancelled.");
+            } else {
+                logger.info("Failed to cancel task " + taskName);
+            }
+        } else {
+            logger.info("Task " + taskName + " does not exist or is already cancelled.");
         }
     }
 
@@ -81,9 +90,29 @@ public class TaskManager {
         return userTasks.containsKey(taskName);
     }
 
-    // 停止所有任务
+    // 停止所有任务，但保持线程池活跃
+    //取消了所有调度任务，并且清空了 userTasks 中存储的任务列表。
+    //线程池不被销毁，保持活跃状态，可以继续调度新的任务。
+    public void shutdownTasksOnly() {
+        logger.info("Cancelling all tasks...");
+        // 取消所有调度的任务
+        for (ScheduledFuture<?> future : userTasks.values()) {
+            future.cancel(true);
+        }
+        userTasks.clear();  // 清除任务列表
+    }
+
+    // 强制关闭所有任务和线程池（如果需要关闭线程池）
     public void shutdown() {
         schedulerService.shutdownNow();
     }
 
+    // 优雅地停止所有任务（保持线程池活跃）
+    //调用 shutdownTasksOnly() 来停止任务，同时保持线程池活跃。
+    //可以根据需要添加更多的优雅关闭逻辑，确保任务不会丢失，并且线程池可以继续工作。
+    public void shutdownGracefully() {
+        logger.info("Gracefully stopping all tasks...");
+        shutdownTasksOnly();
+        // 注意：线程池仍然保持活跃，可以继续调度新任务
+    }
 }

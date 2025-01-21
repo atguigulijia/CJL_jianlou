@@ -10,9 +10,7 @@ public class PlatformInfo {
 
     public static String name = "藏精灵";
     public static String use = "市场捡漏";
-    public static String version = "v1";
-
-
+    public static String version = "v2";
 
 
 }

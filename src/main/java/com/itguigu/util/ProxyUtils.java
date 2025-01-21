@@ -47,7 +47,7 @@ public class ProxyUtils {
                  LogUtil.println("提取代理ip失败, 响应码: " + responseCode);
             }
         } catch (IOException e) {
-             LogUtil.println("请求失败: " + e.getMessage());
+             LogUtil.println("提取代理ip异常: " + e.getMessage());
         }
         return null;  // 请求失败或格式错误时返回 null
     }

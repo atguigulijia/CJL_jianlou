@@ -1,4 +1,4 @@
-package com.itguigu.service;
+package com.itguigu.api;
 
 import com.itguigu.model.GlobalProperties;
 import com.itguigu.model.Response;
